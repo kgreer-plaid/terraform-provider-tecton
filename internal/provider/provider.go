@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -132,7 +133,7 @@ func (p *TectonProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	resp.DataSourceData = providerData
 	resp.ResourceData = providerData
 
-	tflog.Info(ctx, "Configured Tecton provider.")
+	tflog.Info(ctx, "Configured Tecton provider")
 }
 
 // DataSources defines the data sources implemented in the provider.
@@ -147,30 +148,30 @@ func (p *TectonProvider) DataSources(ctx context.Context) []func() datasource.Da
 	return nil
 }
 
+// Query the complete list of workspaces in the Tecton instance. And parse the output
+// An example output from `tecton workspace list` is the following:
+// ```
+// Live Workspaces:
+//   a
+//   b
+//
+// Development Workspaces:
+//   c
+// * d
+//   e
+// ```
+// Where the '*' character begins the line of the current "active" workspace. The concept of an
+// active workspace is not used in this provider, but we still need to handle it in this parsing
+// function.
+//
+// The expected output of this function given the above ouput from Tecton is the following
+// ```
+// Workspace{
+//    Lives: []string{"a", "b"}
+//    Devs:  []string{"c", "d", "e"}
+// }
+// ```
 func ListWorkspaces(ctx context.Context, commandEnv []string) (Workspaces, error) {
-	// Query the complete list of workspaces in the Tecton instance. And parse the output
-	// An example output from `tecton workspace list` is the following:
-	// ```
-	// Live Workspaces:
-	//   a
-	//   b
-	//
-	// Development Workspaces:
-	//   c
-	// * d
-	//   e
-	// ```
-	// Where the '*' character begins the line of the current "active" workspace. The concept of an
-	// active workspace is not used in this provider, but we still need to handle it in this parsing
-	// function.
-	//
-	// The expected output of this function given the above ouput from Tecton is the following
-	// ```
-	// Workspace{
-	//    Lives: []string{"a", "b"}
-	//    Devs:  []string{"c", "d", "e"}
-	// }
-	// ```
 	cmd := exec.Command("tecton", "workspace", "list")
 	cmd.Env = commandEnv
 	output, err := cmd.CombinedOutput()
@@ -178,6 +179,19 @@ func ListWorkspaces(ctx context.Context, commandEnv []string) (Workspaces, error
 		err := errors.New(fmt.Sprintf("%v\nOutput: %v", err.Error(), string(output)))
 		return Workspaces{}, err
 	}
+
+	// Assert the output matches the expected regex
+	expectedOutputRegex := regexp.MustCompile("Live Workspaces:\\n(\\*? +([^ ]+)\\n?)*\\nDevelopment Workspaces:\\n(\\*? +([^ ]+)\\n?)*")
+	matches := expectedOutputRegex.Match(output)
+	if !matches {
+		err := errors.New(fmt.Sprintf(
+			"`tecton workspace list` returned unexpected output.\nExpected to match regex: %v\nGot:\"%v\"",
+			expectedOutputRegex,
+			string(output),
+		))
+		return Workspaces{}, err
+	}
+
 	lines := strings.Split(string(output), "\n")
 
 	workspaces := Workspaces{}

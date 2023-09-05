@@ -56,7 +56,7 @@ func (r *workspaceResource) Configure(_ context.Context, req resource.ConfigureR
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected []string, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -127,7 +127,12 @@ func (r *workspaceResource) Create(ctx context.Context, req resource.CreateReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to create Tecton workspace",
-			fmt.Sprintf("Command to create Tecton workspace '%v' failed. Command output was: %v", plan.Name.ValueString(), output),
+			fmt.Sprintf(
+				"Command to create Tecton workspace '%v' failed.\nError: %v\nOutput: %v",
+				plan.Name.ValueString(),
+				err.Error(),
+				output,
+			),
 		)
 		return
 	}
@@ -160,13 +165,12 @@ func (r *workspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Get workspace values from prefetched list
-	isLive, err := GetWorkspace(ctx, r, state.Name.ValueString())
+	isLive, err := GetWorkspace(ctx, r.WorkspaceData, state.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error Reading Workspace", err.Error())
 		return
 	}
 	state.Live = types.BoolValue(isLive)
-	tflog.Info(ctx, "reading...")
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
@@ -186,7 +190,7 @@ func (r *workspaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Also Retrieve current state
+	// Also retrieve current state
 	var state workspaceResourceModel
 	diags = req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -251,17 +255,18 @@ func (r *workspaceResource) ImportState(ctx context.Context, req resource.Import
 }
 
 // Scans prefetched workspace data for a particular workspace. Returns (isLive, error) where isLive is true
-// if the workspace is a live workspace, and false if it is a development workspace.
-func GetWorkspace(ctx context.Context, r *workspaceResource, workspaceName string) (bool, error) {
+// if the workspace is a live workspace, and false if it is a development workspace. If error != nil, then
+// the value of isLive is undefined.
+func GetWorkspace(ctx context.Context, workspaces Workspaces, workspaceName string) (bool, error) {
 	var workspaceFound = false
 	var isLive = false
-	for _, ws := range r.WorkspaceData.Lives {
+	for _, ws := range workspaces.Lives {
 		if ws == workspaceName {
 			isLive = true
 			workspaceFound = true
 		}
 	}
-	for _, ws := range r.WorkspaceData.Devs {
+	for _, ws := range workspaces.Devs {
 		if ws == workspaceName {
 			isLive = false
 			workspaceFound = true
