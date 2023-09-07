@@ -1,4 +1,4 @@
-module github.com/k-greer/terraform-provider-tecton
+module github.com/kgreer-plaid/terraform-provider-tecton
 
 go 1.19
 

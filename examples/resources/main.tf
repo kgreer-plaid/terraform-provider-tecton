@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     tecton = {
-      source = "registry.terraform.io/k-greer/tecton"
+      source = "registry.terraform.io/kgreer-plaid/tecton"
     }
   }
 }

@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/k-greer/terraform-provider-tecton/internal/provider"
+	"github.com/kgreer-plaid/terraform-provider-tecton/internal/provider"
 )
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
@@ -39,7 +39,7 @@ func main() {
 
 	opts := providerserver.ServeOpts{
 		// TODO: Update this string with the published name of your provider.
-		Address: "registry.terraform.io/k-greer/tecton",
+		Address: "registry.terraform.io/kgreer-plaid/tecton",
 		Debug:   debug,
 	}
 
