@@ -13,9 +13,8 @@ description: |-
 ## Example Usage
 
 ```terraform
-provider "tecton" {
-  url     = var.tecton_url
-  api_key = var.tecton_api_key
+provider "scaffolding" {
+  # example configuration here
 }
 ```
 

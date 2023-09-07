@@ -429,13 +429,13 @@ func (r *accessPolicyResource) GetFromTecton(ctx context.Context, state *accessP
 		level := i
 		roleToLevel[role] = level
 	}
-	cmp := func(lhs types.String, rhs types.String) bool {
+	cmp := func(lhs types.String, rhs types.String) int {
 		lhsLevel, lhsOk := roleToLevel[lhs.ValueString()]
 		rhsLevel, rhsOk := roleToLevel[rhs.ValueString()]
 		if !lhsOk || !rhsOk {
-			return false
+			return 0
 		}
-		return lhsLevel < rhsLevel
+		return lhsLevel - rhsLevel
 	}
 	slices.SortFunc(state.AllWorkspaces, cmp)
 	for _, roles := range state.Workspaces {

@@ -18,8 +18,8 @@ variable "tecton_url" {
 }
 
 variable "tecton_service_account_id" {
-	description = "A Tecton service account ID"
-	type = string
+  description = "A Tecton service account ID"
+  type        = string
 }
 
 provider "tecton" {
@@ -38,9 +38,9 @@ resource "tecton_workspace" "tf_workspace_test_live" {
 }
 
 resource "tecton_access_policy" "tf_access_policy_test" {
-    service_account_id = var.tecton_service_account_id
-    admin = false
-    workspaces = {
-       (tecton_workspace.tf_workspace_test_dev.name): ["viewer"],
-    }
+  service_account_id = var.tecton_service_account_id
+  admin              = false
+  workspaces = {
+    (tecton_workspace.tf_workspace_test_dev.name) : ["viewer"],
+  }
 }
