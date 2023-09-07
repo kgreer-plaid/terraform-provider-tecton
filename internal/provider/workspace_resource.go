@@ -76,7 +76,8 @@ func (r *workspaceResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description: "Identifier for this workspace. Equal to the workspace name.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -85,7 +86,8 @@ func (r *workspaceResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Computed: true,
 			},
 			"name": schema.StringAttribute{
-				Required: true,
+				Description: "The name of the workspace.",
+				Required:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9-_]+$`),
@@ -94,7 +96,8 @@ func (r *workspaceResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				},
 			},
 			"live": schema.BoolAttribute{
-				Required: true,
+				Description: "True if this workspace is a live workspace. False otherwise (i.e. it is a development workspace)",
+				Required:    true,
 			},
 		},
 	}

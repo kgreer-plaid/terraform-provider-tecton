@@ -70,11 +70,13 @@ func (p *TectonProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
-				Required: true,
+				Description: "The URL for your Tecton Cluster. For example, https://<your_cluster>.tecton.ai",
+				Required:    true,
 			},
 			"api_key": schema.StringAttribute{
-				Required:  true,
-				Sensitive: true,
+				Description: "The API key for the account that will be used to query Tecton.",
+				Required:    true,
+				Sensitive:   true,
 			},
 		},
 	}

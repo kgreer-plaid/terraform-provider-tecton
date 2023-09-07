@@ -110,16 +110,19 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				Description: "Identifier for this access policy. In the format of {user|service}-{id}. For example, an access policy for a user with ID 'u' will have the ID 'user-u'.",
+				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"last_updated": schema.StringAttribute{
-				Computed: true,
+				Description: "Timestamp of the last Terraform update of the access policy.",
+				Computed:    true,
 			},
 			"user_id": schema.StringAttribute{
-				Optional: true,
+				Description: "The user ID (e.g. email) to which the permissions in this resource will be applied. Exactly one of `user_id` and `service_account_id` must be provided.",
+				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9-_.@]+$`),
@@ -128,7 +131,8 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 				},
 			},
 			"service_account_id": schema.StringAttribute{
-				Optional: true,
+				Description: "The service account ID to which the permissions in this resource will be applied. Exactly one of `user_id` and `service_account_id` must be provided.",
+				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9]+$`),
@@ -137,9 +141,11 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 				},
 			},
 			"admin": schema.BoolAttribute{
-				Optional: true,
+				Description: "True if this account should have admin privileges. False otherwise.",
+				Optional:    true,
 			},
 			"all_workspaces": schema.ListAttribute{
+				Description: "The list of roles that will be applied to all workspaces. List values must be one of (\"viewer\", \"operator\", \"editor\", \"owner\").",
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.List{
@@ -150,7 +156,8 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 				},
 			},
 			"workspaces": schema.MapAttribute{
-				Optional: true,
+				Description: "A map where the keys are workspace names and the values are a list of roles that will be applied to the workspace. List values must be one of (\"viewer\", \"operator\", \"editor\", \"owner\").",
+				Optional:    true,
 				ElementType: types.ListType{
 					ElemType: types.StringType,
 				},

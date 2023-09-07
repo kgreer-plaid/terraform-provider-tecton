@@ -13,8 +13,9 @@ description: |-
 ## Example Usage
 
 ```terraform
-provider "scaffolding" {
-  # example configuration here
+provider "tecton" {
+  url     = "https://yourcluster.tecton.ai"
+  api_key = "abc"
 }
 ```
 
@@ -23,5 +24,5 @@ provider "scaffolding" {
 
 ### Required
 
-- `api_key` (String, Sensitive)
-- `url` (String)
+- `api_key` (String, Sensitive) The API key for the account that will be used to query Tecton.
+- `url` (String) The URL for your Tecton Cluster. For example, https://<your_cluster>.tecton.ai
