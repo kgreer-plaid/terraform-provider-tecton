@@ -55,7 +55,7 @@ func (r *workspaceResource) Configure(_ context.Context, req resource.ConfigureR
 
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected ProviderData, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -87,7 +87,6 @@ func (r *workspaceResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"name": schema.StringAttribute{
 				Required: true,
 				Validators: []validator.String{
-					// These are example validators from terraform-plugin-framework-validators
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[a-zA-Z0-9-_]+$`),
 						"must contain only alphanumeric characters, hyphens, or dashes",
@@ -123,7 +122,7 @@ func (r *workspaceResource) Create(ctx context.Context, req resource.CreateReque
 	cmd.Env = r.CommandEnv
 	tflog.Info(ctx, fmt.Sprintf("Creating workspace '%v'", plan.Name.ValueString()))
 
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to create Tecton workspace",
@@ -131,7 +130,7 @@ func (r *workspaceResource) Create(ctx context.Context, req resource.CreateReque
 				"Command to create Tecton workspace '%v' failed.\nError: %v\nOutput: %v",
 				plan.Name.ValueString(),
 				err.Error(),
-				output,
+				string(output),
 			),
 		)
 		return
@@ -221,7 +220,6 @@ func (r *workspaceResource) Update(ctx context.Context, req resource.UpdateReque
 			),
 		)
 	}
-	return
 }
 
 // Delete deletes the resource and removes the Terraform state on success.

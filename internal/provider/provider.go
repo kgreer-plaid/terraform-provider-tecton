@@ -140,6 +140,7 @@ func (p *TectonProvider) Configure(ctx context.Context, req provider.ConfigureRe
 func (p *TectonProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewWorkspaceResource,
+		NewAccessPolicyResource,
 	}
 }
 
@@ -181,7 +182,7 @@ func ListWorkspaces(ctx context.Context, commandEnv []string) (Workspaces, error
 	}
 
 	// Assert the output matches the expected regex
-	expectedOutputRegex := regexp.MustCompile("Live Workspaces:\\n(\\*? +([^ ]+)\\n?)*\\nDevelopment Workspaces:\\n(\\*? +([^ ]+)\\n?)*")
+	expectedOutputRegex := regexp.MustCompile(`Live Workspaces:\n(\*? +([^ ]+)\n?)*\nDevelopment Workspaces:\n(\*? +([^ ]+)\n?)*`)
 	matches := expectedOutputRegex.Match(output)
 	if !matches {
 		err := errors.New(fmt.Sprintf(
