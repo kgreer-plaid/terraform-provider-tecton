@@ -25,6 +25,16 @@ variable "tecton_url" {
 	type = string
 }
 
+variable "tecton_service_account_existing_roles" {
+	description = "A service account ID for a service that already has an existing role"
+	type = string
+}
+
+variable "tecton_service_account_no_existing_roles" {
+	description = "A service account ID for a service that has no existing roles"
+	type = string
+}
+
 provider "tecton" {
 	url = var.tecton_url
 	api_key = var.tecton_api_key

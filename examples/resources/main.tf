@@ -17,12 +17,30 @@ variable "tecton_url" {
   type        = string
 }
 
+variable "tecton_service_account_id" {
+	description = "A Tecton service account ID"
+	type = string
+}
+
 provider "tecton" {
   url     = var.tecton_url
   api_key = var.tecton_api_key
 }
 
-resource "tecton_workspace" "tf_workspace_test_sept1_v2" {
-  name = "tf-workspace-test-sept1"
+resource "tecton_workspace" "tf_workspace_test_dev" {
+  name = "tf-workspace-test-dev"
   live = false
+}
+
+resource "tecton_workspace" "tf_workspace_test_live" {
+  name = "tf-workspace-test-live"
+  live = true
+}
+
+resource "tecton_access_policy" "tf_access_policy_test" {
+    service_account_id = var.tecton_service_account_id
+    admin = false
+    workspaces = {
+       (tecton_workspace.tf_workspace_test_dev.name): ["viewer"],
+    }
 }
