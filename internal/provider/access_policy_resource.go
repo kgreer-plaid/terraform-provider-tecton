@@ -42,7 +42,7 @@ type accessPolicyResource struct {
 	CommandEnv []string
 }
 
-// The valid roles, in order of increasing power
+// The valid roles, in order of increasing power.
 var validRoles = []string{"viewer", "operator", "editor", "owner"}
 
 // accessPolicyResourceModel maps the resource schema data.
@@ -56,20 +56,20 @@ type accessPolicyResourceModel struct {
 	Workspaces       map[string][]types.String `tfsdk:"workspaces"`
 }
 
-// A policy for a single workspace (or organization) in the JSON output of `tecton access-control get-roles`
+// A policy for a single workspace (or organization) in the JSON output of `tecton access-control get-roles`.
 type tectonGetRolesPolicy struct {
 	ResourceType  string                      `json:"resource_type"`
 	WorkspaceName string                      `json:"workspace_name,omitempty"`
 	RolesGranted  []tectonGetRolesRoleGranted `json:"roles_granted"`
 }
 
-// A single role (e.g. "owner") in the JSON output of `tecton access-control get-roles`
+// A single role (e.g. "owner") in the JSON output of `tecton access-control get-roles`.
 type tectonGetRolesRoleGranted struct {
 	Role              string                          `json:"role"`
 	AssignmentSources []tectonGetRoleAssignmentSource `json:"assignment_sources"`
 }
 
-// An assignment source (e.g. DIRECT) in the JSON output of `tecton access-control get-roles`
+// An assignment source (e.g. DIRECT) in the JSON output of `tecton access-control get-roles`.
 type tectonGetRoleAssignmentSource struct {
 	AssignmentType string `json:"assignment_type"`
 }
@@ -382,13 +382,11 @@ func (r *accessPolicyResource) GetFromTecton(ctx context.Context, state *accessP
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return false, errors.New(
-			fmt.Sprintf(
-				"Command to read Tecton roles for '%v' failed.\nError: %v\nOutput: %v",
-				strings.Join(args[3:], " "),
-				err.Error(),
-				string(output),
-			),
+		return false, fmt.Errorf(
+			"Command to read Tecton roles for '%v' failed.\nError: %v\nOutput: %v",
+			strings.Join(args[3:], " "),
+			err.Error(),
+			string(output),
 		)
 	}
 
@@ -396,9 +394,7 @@ func (r *accessPolicyResource) GetFromTecton(ctx context.Context, state *accessP
 	var policies []tectonGetRolesPolicy
 	err = json.Unmarshal(output, &policies)
 	if err != nil {
-		return false, errors.New(
-			fmt.Sprintf("Failed to parse output of `tecton access-control get-roles`.\nGot: %v", output),
-		)
+		return false, fmt.Errorf("Failed to parse output of `tecton access-control get-roles`.\nGot: %v", output)
 	}
 
 	// Clear fields
@@ -477,18 +473,16 @@ func (r *accessPolicyResource) ModifyRole(ctx context.Context, userID string, se
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return errors.New(
-			fmt.Sprintf(
-				"Command to set Tecton role failed.\nError: %v\nOutput: %v",
-				err.Error(),
-				string(output),
-			),
+		return fmt.Errorf(
+			"Command to set Tecton role failed.\nError: %v\nOutput: %v",
+			err.Error(),
+			string(output),
 		)
 	}
 	return nil
 }
 
-// Returns elements that are in a that are not in b
+// Returns elements that are in a that are not in b.
 func SliceDifference(a, b []types.String) []string {
 	mb := make(map[string]bool, len(b))
 	for _, x := range b {
@@ -503,7 +497,7 @@ func SliceDifference(a, b []types.String) []string {
 	return diff
 }
 
-// Makes the necessary calls in order to make Tecton consistent with `planRoles`
+// Makes the necessary calls in order to make Tecton consistent with `planRoles`.
 func (r *accessPolicyResource) UpdateWorkspace(
 	ctx context.Context,
 	userID string,
@@ -536,7 +530,7 @@ func (r *accessPolicyResource) UpdateWorkspace(
 	return nil
 }
 
-// Make the necessary calls to make Tecton consistent with this accessPolicy
+// Make the necessary calls to make Tecton consistent with this accessPolicy.
 func (r *accessPolicyResource) UpdateAccessPolicy(
 	ctx context.Context,
 	plan *accessPolicyResourceModel,
@@ -559,7 +553,7 @@ func (r *accessPolicyResource) UpdateAccessPolicy(
 	// Handle other workspaces
 	handledWorkspaces := make(map[string]bool)
 	for ws, planRoles := range plan.Workspaces {
-		stateRoles, _ := state.Workspaces[ws]
+		stateRoles := state.Workspaces[ws]
 		err := r.UpdateWorkspace(ctx, plan.UserID.ValueString(), plan.ServiceAccountID.ValueString(), ws, planRoles, stateRoles)
 		if err != nil {
 			return err
@@ -570,7 +564,7 @@ func (r *accessPolicyResource) UpdateAccessPolicy(
 		if _, alreadyHandled := handledWorkspaces[ws]; alreadyHandled {
 			continue
 		}
-		planRoles, _ := plan.Workspaces[ws]
+		planRoles := plan.Workspaces[ws]
 		err := r.UpdateWorkspace(ctx, plan.UserID.ValueString(), plan.ServiceAccountID.ValueString(), ws, planRoles, stateRoles)
 		if err != nil {
 			return err

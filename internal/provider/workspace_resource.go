@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -274,7 +273,7 @@ func GetWorkspace(ctx context.Context, workspaces Workspaces, workspaceName stri
 		}
 	}
 	if !workspaceFound {
-		return false, errors.New(fmt.Sprintf("Tecton workspace with name '%v' does not exist.", workspaceName))
+		return false, fmt.Errorf("Tecton workspace with name '%v' does not exist.", workspaceName)
 	}
 	return isLive, nil
 }
