@@ -125,8 +125,8 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[a-zA-Z0-9-_.@]+$`),
-						"must contain only alphanumeric characters, or characters in the set -_.@",
+						regexp.MustCompile(`^[a-zA-Z0-9_.@-]+$`),
+						"must contain only alphanumeric characters, or characters in the set _.@-",
 					),
 				},
 			},
