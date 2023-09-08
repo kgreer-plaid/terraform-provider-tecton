@@ -5,7 +5,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -70,11 +69,13 @@ func (p *TectonProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
-				Required: true,
+				Description: "The URL for your Tecton Cluster. For example, https://<your_cluster>.tecton.ai",
+				Required:    true,
 			},
 			"api_key": schema.StringAttribute{
-				Required:  true,
-				Sensitive: true,
+				Description: "The API key for the account that will be used to query Tecton.",
+				Required:    true,
+				Sensitive:   true,
 			},
 		},
 	}
@@ -149,35 +150,34 @@ func (p *TectonProvider) DataSources(ctx context.Context) []func() datasource.Da
 	return nil
 }
 
-// Query the complete list of workspaces in the Tecton instance. And parse the output
-// An example output from `tecton workspace list` is the following:
-// ```
-// Live Workspaces:
-//   a
-//   b
-//
-// Development Workspaces:
-//   c
-// * d
-//   e
-// ```
-// Where the '*' character begins the line of the current "active" workspace. The concept of an
-// active workspace is not used in this provider, but we still need to handle it in this parsing
-// function.
-//
-// The expected output of this function given the above ouput from Tecton is the following
-// ```
-// Workspace{
-//    Lives: []string{"a", "b"}
-//    Devs:  []string{"c", "d", "e"}
-// }
-// ```
+// Query the complete list of workspaces in the Tecton instance and parse the output.
 func ListWorkspaces(ctx context.Context, commandEnv []string) (Workspaces, error) {
+	// An example output from `tecton workspace list` is the following:
+	// Live Workspaces:
+	//   a
+	//   b
+	//
+	// Development Workspaces:
+	//   c
+	// * d
+	//   e
+	//
+	// Note: in the Tecton CLI output, the '*' character begins the line of the current "active"
+	// workspace. The concept of an active workspace is not used in this provider, but we still
+	// need to handle it in this parsing function.
+	//
+	// The expected output of this function given the above output from Tecton is the following
+	// ```
+	// Workspace{
+	//    Lives: []string{"a", "b"}
+	//    Devs:  []string{"c", "d", "e"}
+	// }
+	// ```
 	cmd := exec.Command("tecton", "workspace", "list")
 	cmd.Env = commandEnv
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		err := errors.New(fmt.Sprintf("%v\nOutput: %v", err.Error(), string(output)))
+		err := fmt.Errorf("%v\nOutput: %v", err.Error(), string(output))
 		return Workspaces{}, err
 	}
 
@@ -185,11 +185,11 @@ func ListWorkspaces(ctx context.Context, commandEnv []string) (Workspaces, error
 	expectedOutputRegex := regexp.MustCompile(`Live Workspaces:\n(\*? +([^ ]+)\n?)*\nDevelopment Workspaces:\n(\*? +([^ ]+)\n?)*`)
 	matches := expectedOutputRegex.Match(output)
 	if !matches {
-		err := errors.New(fmt.Sprintf(
+		err := fmt.Errorf(
 			"`tecton workspace list` returned unexpected output.\nExpected to match regex: %v\nGot:\"%v\"",
 			expectedOutputRegex,
 			string(output),
-		))
+		)
 		return Workspaces{}, err
 	}
 

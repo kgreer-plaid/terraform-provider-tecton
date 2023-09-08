@@ -8,11 +8,13 @@ description: |-
 
 # tecton_workspace (Resource)
 
+
+
 ## Example Usage
 
 ```terraform
-resource "tecton_workspace" "test" {
-  name = "test"
+resource "tecton_workspace" "tf_workspace_test_dev" {
+  name = "tf-workspace-test-dev"
   live = false
 }
 ```
@@ -22,10 +24,19 @@ resource "tecton_workspace" "test" {
 
 ### Required
 
-- `live` (Boolean)
-- `name` (String)
+- `live` (Boolean) True if this workspace is a live workspace. False otherwise (i.e. it is a development workspace)
+- `name` (String) The name of the workspace.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Identifier for this workspace. Equal to the workspace name.
 - `last_updated` (String)
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Workspaces can be imported by specifying the workspace name
+terraform import tecton_workspace.example test-workspace-name
+```

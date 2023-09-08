@@ -42,10 +42,14 @@ To compile the provider, run `go install`. This will build the provider and put 
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of Acceptance tests, run `make testacc` with the environment variables specified below.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
 ```shell
+TF_VAR_tecton_api_key=<your-tecton-api-key> \
+TF_VAR_tecton_url=<your-tecton-url> \
+TF_VAR_tecton_service_account_existing_roles=<your-tecton-service-account-id-with-existing-roles> \
+TF_VAR_tecton_service_account_no_existing_roles=<your-tecton-service-account-id-with-no-existing-roles> \
 make testacc
 ```

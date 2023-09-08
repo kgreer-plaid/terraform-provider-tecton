@@ -14,8 +14,8 @@ description: |-
 
 ```terraform
 provider "tecton" {
-  url     = var.tecton_url
-  api_key = var.tecton_api_key
+  url     = "https://yourcluster.tecton.ai"
+  api_key = "abc"
 }
 ```
 
@@ -24,5 +24,5 @@ provider "tecton" {
 
 ### Required
 
-- `api_key` (String, Sensitive)
-- `url` (String)
+- `api_key` (String, Sensitive) The API key for the account that will be used to query Tecton.
+- `url` (String) The URL for your Tecton Cluster. For example, https://<your_cluster>.tecton.ai
